@@ -19,8 +19,8 @@ class MarkdownSplitter:
     Processes Markdown documents and splits them into sections based on
     header levels (# through #####). It maintains the hierarchical relationships between
     sections and tracks sibling headers at the same level. Valid Markdown headers should
-    start with '#' followed by a space (e.g., "# Header 1", "## Header 2").
-    The expresssion used to match headers is: `^(#+)\s+(.+)$`. If the header pattern in
+    start with \'#\' followed by a space (e.g., "# Header 1", "## Header 2").
+    The expresssion used to match headers is: `^(#+)\\s+(.+)$`. If the header pattern in
     your text is different, you may need to adjust the `_header_pattern` attribute.
 
     Key Features:
@@ -362,6 +362,7 @@ class MarkdownSplitter:
             splitter = cls()
             with path.open("r", encoding=encoding) as f:
                 return splitter.split_text(f.read())
+
         except Exception as e:
             logger.error(
                 f"Failed to split the Markdown file: {path}. Error: {str(e)}", exc_info=True
