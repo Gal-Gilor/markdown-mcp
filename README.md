@@ -3,17 +3,37 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Gal-Gilor/markdown-mcp)
 
-# Markdown MCP
+# Markdown MCP Server
 
-A Model Context Protocol (MCP) server that intelligently splits Markdown documents into hierarchical sections while preserving parent-child relationships and sibling connections.
+> **Learn MCP Development by Example** 📚  
+> A complete, production-ready Model Context Protocol (MCP) server that demonstrates best practices for building intelligent document processing tools.
+
+## 🎯 What is this?
+
+This is a **Model Context Protocol (MCP) server** that intelligently splits Markdown documents into hierarchical sections while preserving parent-child relationships and sibling connections. Built with FastMCP and FastAPI, it serves as both a useful tool and an educational resource for developers learning to create their own MCP servers.
+
+### Why MCP?
+
+The Model Context Protocol enables AI assistants to access external tools and data sources securely and efficiently. This server demonstrates how to:
+- Build MCP-compliant tools that AI models can use
+- Handle structured document processing
+- Maintain relationships in hierarchical data
+- Integrate with modern Python web frameworks
 
 ## Features
 
-*   **Hierarchical splitting:** Maintains header relationships (H1 → H2 → H3...).
-*   **Sibling detection:** Identifies headers at the same level.
-*   **Code-aware:** Ignores `#` comments in code blocks.
-*   **MCP compliant:** Standard Model Context Protocol interface.
-*   **FastAPI powered:** High-performance async server.
+### Core Functionality
+- **Hierarchical Splitting**: Maintains header relationships (H1 → H2 → H3...)
+- **Sibling Detection**: Identifies headers at the same level for navigation
+- **Code-Aware Processing**: Ignores `#` comments in fenced code blocks
+- **Rich Metadata**: Includes parent references, sibling lists, and optional token counts
+
+### Technical Stack
+- **MCP Compliant**: Full Model Context Protocol interface support
+- **FastAPI Powered**: High-performance async server with automatic OpenAPI docs
+- **Well Tested**: Core splitting functionality covered with pytest
+- **Type Safety**: Complete type hints with Pydantic models
+- **Docker Ready**: Containerized deployment support
 
 ## Requirements
 
@@ -33,11 +53,17 @@ python src/main.py
 
 ## Usage
 
-To run the MCP server:
+To run the MCP server (if the environment is activated):
 
 ```bash
 python src/main.py
 ```
+
+If the environment is not activated, you can run using Poetry:
+```bash
+poetry run python src/main.py
+```
+
 
 - The server will start on `http://0.0.0.0:8080`.
 - The MCP server is mounted at `/server`. 
@@ -75,22 +101,56 @@ python src/main.py
         }'
         ```
 
-## Development
+## Architecture Overview
 
-This project includes a `Makefile` to simplify common development tasks.
+### Project Structure
+```
+src/
+├── main.py          # FastAPI app and MCP server setup
+├── models.py        # Pydantic data models
+└── splitter.py      # Core splitting logic
 
-- `make lint`: Run `ruff` to check for linting issues.
-- `make test`: Run tests using `pytest`.
-
-### Running Tests
-
-This project uses `pytest` for testing. To run the tests:
-
-```bash
-poetry run pytest
+tests/
+├── conftest.py      # Test fixtures
+└── test_splitter.py # Splitter functionality tests
 ```
 
-Alternatively, you can use the Makefile:
+### Key Components
+
+- **FastMCP Integration**: Uses `@mcp.tool` decorator to expose functions as MCP tools
+- **Pydantic Models**: Type-safe data structures with validation
+- **Hierarchical Processing**: Two-pass algorithm for building document structure
+- **Code Block Protection**: Regex-based approach to ignore comments in code
+
+### How It Works
+
+1. **Code Block Processing**: Protects `#` comments in fenced code blocks
+2. **Header Detection**: Uses regex pattern `^(#+)\s+(.+)$` to find headers
+3. **Hierarchy Building**: Maintains parent-child relationships using a stack
+4. **Sibling Detection**: Groups headers at same level with same parent
+5. **Section Creation**: Converts hierarchical structure to flat list of sections
+
+## Development
+
+### Setup
 ```bash
-make test
+python -m venv .venv && source .venv/bin/activate
+poetry install
+```
+
+### Commands
+- `make lint`: Run ruff for code formatting and linting
+- `make test`: Run pytest test suite  
+- `python src/main.py`: Start the development server
+
+### Testing
+```bash
+# Run all tests
+poetry run pytest
+
+# Run with verbose output
+poetry run pytest -v
+
+# Run specific test file
+poetry run pytest tests/test_splitter.py
 ```
