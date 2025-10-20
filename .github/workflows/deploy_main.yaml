@@ -1,0 +1,50 @@
+name: Deploy to Cloud Run
+description: Deploy the application to Cloud Run on pushes to the main branch
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  id-token: write
+  contents: read
+
+
+jobs:
+  deploy:
+    name: Deploy to Cloud Run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Google Auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/${{ vars.GOOGLE_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.WORKLOAD_IDENTITY_POOL }}/providers/${{ secrets.WORKLOAD_PROVIDER }}
+          service_account: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      
+      - name: Configure Docker for Google Cloud
+        run: gcloud auth configure-docker ${{ vars.GOOGLE_CLOUD_LOCATION }}-docker.pkg.dev
+
+      - name: Build and Tag Docker Image
+        id: build-image
+        run: |
+          TAGGED_IMAGE=${{ vars.GOOGLE_CLOUD_LOCATION }}-docker.pkg.dev/${{ vars.GOOGLE_CLOUD_PROJECT }}/${{ vars.GOOGLE_CLOUD_REGISTRY }}/markdown-mcp:${{ github.sha }}
+          docker build -t $TAGGED_IMAGE .
+          echo "image_tag=$TAGGED_IMAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Push to Artifact Registry
+        run: |
+          docker push ${{ steps.build-image.outputs.image_tag }}
+
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: markdown-mcp
+          image: ${{ steps.build-image.outputs.image_tag }}
+          region: ${{ vars.GOOGLE_CLOUD_LOCATION }}
+            
