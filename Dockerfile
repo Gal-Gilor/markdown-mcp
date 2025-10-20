@@ -23,11 +23,11 @@ COPY pyproject.toml poetry.lock ./
 
 # Configure Poetry for containerized environment:
 # - Create virtual environment in project directory for easier copying
-# - Install only production dependencies (--no-dev)
+# - Install only production dependencies (--only main)
 # - Disable interactive prompts and ANSI colors for CI/CD compatibility
 RUN poetry config virtualenvs.create true && \
     poetry config virtualenvs.in-project true && \
-    poetry install --no-dev --no-interaction --no-ansi
+    poetry install --only main --no-interaction --no-ansi
 
 
 # ---- Final Stage ----
@@ -74,3 +74,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # Default command to run the application
 # Using exec form for better signal handling in containers
 CMD ["python", "src/main.py"]
+
+
