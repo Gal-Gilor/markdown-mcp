@@ -1,6 +1,7 @@
 [![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Execute Tests](https://github.com/Gal-Gilor/markdown-mcp/actions/workflows/execute_main_tests.yaml/badge.svg)](https://github.com/Gal-Gilor/markdown-mcp/actions/workflows/execute_main_tests.yaml)
+[![Deploy to Cloud Run](https://github.com/Gal-Gilor/markdown-mcp/actions/workflows/deploy_main.yaml/badge.svg)](https://github.com/Gal-Gilor/markdown-mcp/actions/workflows/deploy_main.yaml)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Gal-Gilor/markdown-mcp)
 
 # Markdown MCP Server
@@ -10,7 +11,7 @@
 
 ## 🎯 What is this?
 
-This is a **Model Context Protocol (MCP) server** that intelligently splits Markdown documents into hierarchical sections while preserving parent-child relationships and sibling connections. Built with FastMCP and FastAPI, it serves as both a useful tool and an educational resource for developers learning to create their own MCP servers.
+This is a **Model Context Protocol (MCP) server** that intelligently splits Markdown documents into hierarchical sections while preserving parent-child relationships and sibling connections. Built with FastMCP and FastAPI, it serves as both a useful tool and an educational resource for developers learning to create their own MCP servers. The project includes automated testing and deployment via GitHub Actions workflows.
 
 ### Why MCP?
 
@@ -34,6 +35,7 @@ The Model Context Protocol enables AI assistants to access external tools and da
 - **Well Tested**: Core splitting functionality covered with pytest
 - **Type Safety**: Complete type hints with Pydantic models
 - **Docker Ready**: Containerized deployment support
+- **CI/CD**: Automated testing and deployment via GitHub Actions
 
 ## Requirements
 
@@ -140,7 +142,7 @@ poetry install
 
 ### Commands
 - `make lint`: Run ruff for code formatting and linting
-- `make test`: Run pytest test suite  
+- `make test`: Run pytest test suite
 - `python src/main.py`: Start the development server
 
 ### Testing
@@ -154,3 +156,10 @@ poetry run pytest -v
 # Run specific test file
 poetry run pytest tests/test_splitter.py
 ```
+
+### CI/CD
+
+The project includes GitHub Actions workflows for automated testing and deployment:
+
+- **Execute Tests** (`.github/workflows/execute_main_tests.yaml`): Runs pytest test suite on push/PR to main branch
+- **Deploy to Cloud Run** (`.github/workflows/deploy_main.yaml`): Automatically deploys to Google Cloud Run on push to main branch
