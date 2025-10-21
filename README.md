@@ -6,10 +6,10 @@
 
 # Markdown MCP Server
 
-> **Learn MCP Development by Example** 📚  
+> **Learn MCP Development by Example**
 > A complete, production-ready Model Context Protocol (MCP) server that demonstrates best practices for building intelligent document processing tools.
 
-## 🎯 What is this?
+## What is this?
 
 This is a **Model Context Protocol (MCP) server** that intelligently splits Markdown documents into hierarchical sections while preserving parent-child relationships and sibling connections. Built with FastMCP and FastAPI, it serves as both a useful tool and an educational resource for developers learning to create their own MCP servers. The project includes automated testing and deployment via GitHub Actions workflows.
 
