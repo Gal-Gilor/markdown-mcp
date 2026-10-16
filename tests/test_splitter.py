@@ -122,6 +122,9 @@ async def test_split_text_code_blocks_ignored(mcp_server):
         assert sections[0]["header_level"] == 1
         assert "Some content" in sections[0]["section_text"]
         assert "More content" in sections[0]["section_text"]
+        assert '```python\n# This is a comment, not a header\nprint("hello")\n```' in (
+            sections[0]["section_text"]
+        )
 
 
 @pytest.mark.asyncio

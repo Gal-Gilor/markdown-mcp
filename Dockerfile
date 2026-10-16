@@ -8,9 +8,9 @@ ENV POETRY_VERSION=2.0.1
 ENV PATH="$POETRY_HOME/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
 
-# Install Poetry and build essentials for dependency compilation
+# Install Poetry, build essentials for dependency compilation, and git for Git dependencies
 # Remove unnecessary packages after installation to minimize image size
-RUN apt-get update && apt-get install -y --no-install-recommends curl build-essential \
+RUN apt-get update && apt-get install -y --no-install-recommends curl build-essential git \
     && curl -sSL https://install.python-poetry.org | python3 - --version ${POETRY_VERSION} \
     && apt-get remove -y curl && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 

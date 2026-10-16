@@ -1,8 +1,8 @@
 import pytest
 from fastmcp import FastMCP
 
-from models import Section
-from splitter import MarkdownSplitter
+from markdown_chunkify import MarkdownSplitter
+from markdown_chunkify.core.models import Section
 
 
 @pytest.fixture

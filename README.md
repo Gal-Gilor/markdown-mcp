@@ -109,8 +109,7 @@ poetry run python src/main.py
 ```
 src/
 ├── main.py          # FastAPI app and MCP server setup
-├── models.py        # Pydantic data models
-└── splitter.py      # Core splitting logic
+└── settings.py      # Logging configuration
 
 tests/
 ├── conftest.py      # Test fixtures
@@ -121,16 +120,14 @@ tests/
 
 - **FastMCP Integration**: Uses `@mcp.tool` decorator to expose functions as MCP tools
 - **Pydantic Models**: Type-safe data structures with validation
-- **Hierarchical Processing**: Two-pass algorithm for building document structure
-- **Code Block Protection**: Regex-based approach to ignore comments in code
+- **Splitting Logic**: Provided by the [markdown-chunkify](https://github.com/Gal-Gilor/markdown-chunkify) package
 
 ### How It Works
 
-1. **Code Block Processing**: Protects `#` comments in fenced code blocks
-2. **Header Detection**: Uses regex pattern `^(#+)\s+(.+)$` to find headers
-3. **Hierarchy Building**: Maintains parent-child relationships using a stack
-4. **Sibling Detection**: Groups headers at same level with same parent
-5. **Section Creation**: Converts hierarchical structure to flat list of sections
+1. **Header Detection**: Finds `#` to `######` headers line by line, skipping lines inside fenced code blocks
+2. **Hierarchy Building**: Maintains parent-child relationships using a stack
+3. **Sibling Detection**: Groups headers at same level with same parent
+4. **Section Creation**: Converts hierarchical structure to flat list of sections. Text before the first header becomes a level-0 section with an empty header
 
 ## Development
 

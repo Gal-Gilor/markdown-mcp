@@ -4,9 +4,9 @@ import uvicorn
 from fastapi import FastAPI
 from fastmcp import FastMCP
 
-from models import Section
+from markdown_chunkify import MarkdownSplitter
+from markdown_chunkify.core.models import Section
 from settings import get_logger
-from splitter import MarkdownSplitter
 
 logger = get_logger("MarkdownMCPServer")
 
@@ -48,6 +48,8 @@ def split_text(text: str) -> list[Section]:
         - section_text: The content between this header and the next
         - header_level: The level of the header (1 for H1, 2 for H2, etc.)
         - metadata: Contains parent headers and sibling relationships
+        Text before the first header, or a document without headers, is returned
+        as a section with header_level 0 and an empty section_header.
 
     Example:
         Input: "# Main\\nContent here\\n## Sub\\nSub content"
