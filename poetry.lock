@@ -718,17 +718,17 @@ files = []
 develop = false
 
 [package.dependencies]
-pydantic = ">=2.10.6,<3.0.0"
+pydantic = ">=2.10.6,<3"
 
 [package.extras]
-normalize = ["google-genai (>=1.2.0,<2.0.0)", "jinja2 (>=3.1.5,<4.0.0)", "tenacity (>=9.0.0,<10.0.0)"]
+normalize = ["google-genai (>=1.2.0,<2)", "jinja2 (>=3.1.5,<4)", "tenacity (>=9.0.0,<10)"]
 pdf = ["pymupdf4llm (>=0.0.17,<0.0.18)"]
 
 [package.source]
 type = "git"
 url = "https://github.com/Gal-Gilor/markdown-chunkify.git"
-reference = "e0ddaf4fe96007bca5a339148109ca396beb612d"
-resolved_reference = "e0ddaf4fe96007bca5a339148109ca396beb612d"
+reference = "52ab0ef327fbd5fbcab340ef04c2aee5525db864"
+resolved_reference = "52ab0ef327fbd5fbcab340ef04c2aee5525db864"
 
 [[package]]
 name = "markdown-it-py"
@@ -1729,4 +1729,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "981ee48b529d8768c2ffee92415e4075bb1e4986082e0ed36e9fa8ab30271968"
+content-hash = "18b620a81dda4d43dd7ff44ec9868fa0462887611c58e558111ea6fc1d48fff4"

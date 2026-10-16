@@ -15,7 +15,7 @@ dependencies = [
     "uvicorn (>=0.34.3,<0.35.0)", 
     "fastapi (>=0.115.12,<0.116.0)", 
     "pyyaml (>=6.0.2,<7.0.0)",
-    "markdown-chunkify @ git+https://github.com/Gal-Gilor/markdown-chunkify.git@e0ddaf4fe96007bca5a339148109ca396beb612d"
+    "markdown-chunkify @ git+https://github.com/Gal-Gilor/markdown-chunkify.git@52ab0ef327fbd5fbcab340ef04c2aee5525db864"
 ]
 
 [project.urls]
