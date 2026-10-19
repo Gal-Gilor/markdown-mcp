@@ -1,18 +1,9 @@
 import pytest
-from fastmcp import FastMCP
 
-from models import Section
-from splitter import MarkdownSplitter
+from main import mcp
 
 
 @pytest.fixture
 def mcp_server():
-    """Create a test FastMCP server with the split_text tool."""
-    server = FastMCP("TestServer")
-
-    @server.tool
-    def split_text(text: str) -> list[Section]:
-        """Splits Markdown text"""
-        return MarkdownSplitter().split_text(text)
-
-    return server
+    """The production FastMCP server, so tests run the code that ships."""
+    return mcp

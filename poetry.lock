@@ -708,6 +708,21 @@ docs = ["intersphinx-registry", "myst-parser", "pydata-sphinx-theme", "sphinx-au
 test = ["ipykernel", "pre-commit", "pytest (<9)", "pytest-cov", "pytest-timeout"]
 
 [[package]]
+name = "markdown-chunkify"
+version = "0.3.0"
+description = "Split Markdown into hierarchical sections with ids, parent links and source spans."
+optional = false
+python-versions = ">=3.12"
+groups = ["main"]
+files = [
+    {file = "markdown_chunkify-0.3.0-py3-none-any.whl", hash = "sha256:3c75474620dd1cc86bd14b2c2855706e8315e53f2cfb1e4ea297bf28bac7671d"},
+    {file = "markdown_chunkify-0.3.0.tar.gz", hash = "sha256:eb74ee0d78c4eed3b3f4b00aa66d1be20186fc4a7c162634857038a1bf7418f1"},
+]
+
+[package.dependencies]
+pydantic = ">=2.0.2"
+
+[[package]]
 name = "markdown-it-py"
 version = "3.0.0"
 description = "Python port of markdown-it. Markdown parsing, done right!"
@@ -1706,4 +1721,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "0ab3f14b239ae51c95722fc8fcf26bf7846c1bf38316decd8612657f276d9fc8"
+content-hash = "f5c10ae8e0f17dcd5357add0b25fa865d0e7735f21231d0f54f7cb8a235a6f19"

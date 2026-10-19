@@ -4,9 +4,9 @@ import uvicorn
 from fastapi import FastAPI
 from fastmcp import FastMCP
 
-from models import Section
+from markdown_chunkify import MarkdownSplitter
+from markdown_chunkify import Section
 from settings import get_logger
-from splitter import MarkdownSplitter
 
 logger = get_logger("MarkdownMCPServer")
 
@@ -15,8 +15,8 @@ logger = get_logger("MarkdownMCPServer")
 def _splitter() -> MarkdownSplitter:
     """Returns a cached instance of MarkdownSplitter.
 
-    Uses LRU cache to ensure only one instance is created for the application
-    lifecycle, improving memory efficiency and performance.
+    The library splitter is immutable, so one cached instance is safe to share
+    across concurrent requests.
 
     Returns:
         MarkdownSplitter: A cached instance of the MarkdownSplitter class.
@@ -34,9 +34,9 @@ markdown_splitter = _splitter()
 def split_text(text: str) -> list[Section]:
     """Split Markdown text into hierarchical sections.
 
-    This MCP tool processes Markdown documents and returns a list of sections
-    with preserved hierarchy, sibling relationships, and metadata. Each section
-    includes the header text, content, level, and relationship information.
+    This MCP tool processes Markdown documents and returns a flat list of
+    sections in document order. Each section carries its header, content, level,
+    and hierarchy metadata (parent links and position in the input).
 
     Args:
         text: The Markdown text to process. Should contain headers marked with
@@ -44,16 +44,20 @@ def split_text(text: str) -> list[Section]:
 
     Returns:
         A list of Section objects containing:
-        - section_header: The header text without '#' markers
-        - section_text: The content between this header and the next
-        - header_level: The level of the header (1 for H1, 2 for H2, etc.)
-        - metadata: Contains parent headers and sibling relationships
+        - header: The header text without '#' markers (empty for pre-header text)
+        - content: The content between this header and the next
+        - level: The header level (1 for H1, 2 for H2, etc.; 0 for text before
+          the first header)
+        - metadata.id: The section's index in the returned list
+        - metadata.parent_id: The id of the parent section, or null for top level
+        - metadata.parents: Ancestor headers keyed by level (e.g. {"h1": "Main"})
+        - metadata.span: [start, end] character offsets of the section in the input
 
     Example:
         Input: "# Main\\nContent here\\n## Sub\\nSub content"
         Returns: [
-            Section(section_header="Main", header_level=1, ...),
-            Section(section_header="Sub", header_level=2, ...)
+            Section(header="Main", level=1, metadata.id=0, metadata.parent_id=None, ...),
+            Section(header="Sub", level=2, metadata.id=1, metadata.parent_id=0, ...)
         ]
     """
     logger.info(f"Processing split_text request with {len(text)} characters")
@@ -76,7 +80,7 @@ asgi_app = mcp.http_app(path="/mcp")
 app = FastAPI(
     title="Markdown MCP Server",
     description="A Model Context Protocol server for splitting Markdown documents",
-    version="0.1.0",
+    version="0.2.0",
     lifespan=asgi_app.lifespan,
 )
 
