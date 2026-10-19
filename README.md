@@ -11,7 +11,7 @@
 
 ## What is this?
 
-This is a **Model Context Protocol (MCP) server** that intelligently splits Markdown documents into hierarchical sections while preserving parent-child relationships and sibling connections. Built with FastMCP and FastAPI, it serves as both a useful tool and an educational resource for developers learning to create their own MCP servers. The project includes automated testing and deployment via GitHub Actions workflows.
+This is a **Model Context Protocol (MCP) server** that intelligently splits Markdown documents into hierarchical sections while preserving parent-child relationships. Built with FastMCP and FastAPI, it serves as both a useful tool and an educational resource for developers learning to create their own MCP servers. The project includes automated testing and deployment via GitHub Actions workflows.
 
 ### Why MCP?
 
@@ -25,9 +25,9 @@ The Model Context Protocol enables AI assistants to access external tools and da
 
 ### Core Functionality
 - **Hierarchical Splitting**: Maintains header relationships (H1 → H2 → H3...)
-- **Sibling Detection**: Identifies headers at the same level for navigation
+- **Sibling Navigation**: Sections that share a `parent_id` are siblings
 - **Code-Aware Processing**: Ignores `#` comments in fenced code blocks
-- **Rich Metadata**: Includes parent references, sibling lists, and optional token counts
+- **Rich Metadata**: Includes parent references and character offsets into the input
 
 ### Technical Stack
 - **MCP Compliant**: Full Model Context Protocol interface support
@@ -75,19 +75,24 @@ poetry run python src/main.py
     *   **`split_text(text: str) -> list[Section]`**: Splits the input Markdown `text` into a list of `Section` objects.
         ```json
         {
-            "section_header": "Getting Started",
-            "section_text": "Welcome to the guide...",
-            "header_level": 2,
+            "header": "Getting Started",
+            "content": "Install it.",
+            "level": 2,
             "metadata": {
+                "id": 1,
+                "parent_id": 0,
                 "parents": {"h1": "Introduction"},
-                "siblings": ["Advanced Topics", "FAQ"]
+                "span": [25, 55],
+                "char_count": 30
             }
         }
         ```
 
+        `level` is `0` for text before the first header. `metadata.id` is the section's position in document order, `parent_id` is the id of the enclosing section (`null` at the top level), and `span` is the `[start, end)` character range of the section in the input `text`. Siblings are the sections that share the same `parent_id`.
+
         **Example Request:**
         ```bash
-        curl -X POST http://localhost:8080/server/mcp/tools/call \
+        curl -X POST http://localhost:8080/server/mcp/ \
         -H "Content-Type: application/json" \
         -H "Accept: application/json, text/event-stream" \
         -d '{
@@ -109,28 +114,20 @@ poetry run python src/main.py
 ```
 src/
 ├── main.py          # FastAPI app and MCP server setup
-├── models.py        # Pydantic data models
-└── splitter.py      # Core splitting logic
+└── settings.py      # Logging configuration
 
 tests/
 ├── conftest.py      # Test fixtures
-└── test_splitter.py # Splitter functionality tests
+└── test_splitter.py # split_text tool tests
 ```
+
+Chunking is provided by the [`markdown-chunkify`](https://pypi.org/project/markdown-chunkify/) library; this server wraps it as an MCP tool and returns its `Section` model unchanged.
 
 ### Key Components
 
 - **FastMCP Integration**: Uses `@mcp.tool` decorator to expose functions as MCP tools
-- **Pydantic Models**: Type-safe data structures with validation
-- **Hierarchical Processing**: Two-pass algorithm for building document structure
-- **Code Block Protection**: Regex-based approach to ignore comments in code
-
-### How It Works
-
-1. **Code Block Processing**: Protects `#` comments in fenced code blocks
-2. **Header Detection**: Uses regex pattern `^(#+)\s+(.+)$` to find headers
-3. **Hierarchy Building**: Maintains parent-child relationships using a stack
-4. **Sibling Detection**: Groups headers at same level with same parent
-5. **Section Creation**: Converts hierarchical structure to flat list of sections
+- **markdown-chunkify**: Splits Markdown into hierarchical sections and ignores `#` comments in fenced code blocks
+- **Cached Splitter**: One immutable `MarkdownSplitter` instance is shared across requests
 
 ## Development
 
