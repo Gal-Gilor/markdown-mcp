@@ -63,24 +63,24 @@ class MarkdownMCPClient:
                 raise ValueError("Empty response from server")
 
 
-def group_headers_by_parent(sections: List[Dict]) -> Dict[Optional[int], List[str]]:
-    """Map each parent_id to the headers of its children (None = top level)."""
-    children_by_parent: Dict[Optional[int], List[str]] = {}
+def group_headers_by_parent(sections: List[Dict]) -> Dict[Optional[int], List[Dict]]:
+    """Map each parent_id to its child sections (None = top level)."""
+    children_by_parent: Dict[Optional[int], List[Dict]] = {}
     for section in sections:
         children_by_parent.setdefault(section["metadata"]["parent_id"], []).append(
-            section["header"]
+            section
         )
     return children_by_parent
 
 
 def siblings_of(
-    section: Dict, children_by_parent: Dict[Optional[int], List[str]]
+    section: Dict, children_by_parent: Dict[Optional[int], List[Dict]]
 ) -> List[str]:
-    """Siblings are the sections sharing this section's parent_id, minus itself."""
+    """Headers of sections sharing this section's parent_id, excluding itself by id."""
     return [
-        h
-        for h in children_by_parent[section["metadata"]["parent_id"]]
-        if h != section["header"]
+        s["header"]
+        for s in children_by_parent[section["metadata"]["parent_id"]]
+        if s["metadata"]["id"] != section["metadata"]["id"]
     ]
 
 

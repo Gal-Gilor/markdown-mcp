@@ -198,10 +198,10 @@ class MarkdownMCPClient {
 }
 
 /**
- * Group section headers by their parent section id.
+ * Group sections by their parent section id.
  *
  * @param {Array<Object>} sections - Sections returned by splitText
- * @returns {Map<(number|null), string[]>} Map from metadata.parent_id (null = top level) to child headers
+ * @returns {Map<(number|null), Object[]>} Map from metadata.parent_id (null = top level) to child sections
  */
 function groupHeadersByParent(sections) {
     const childrenByParent = new Map();
@@ -210,7 +210,7 @@ function groupHeadersByParent(sections) {
         if (!childrenByParent.has(parentId)) {
             childrenByParent.set(parentId, []);
         }
-        childrenByParent.get(parentId).push(section.header);
+        childrenByParent.get(parentId).push(section);
     }
     return childrenByParent;
 }
@@ -219,11 +219,13 @@ function groupHeadersByParent(sections) {
  * Siblings are the sections that share a parent_id, minus the section itself.
  *
  * @param {Object} section - A section returned by splitText
- * @param {Map<(number|null), string[]>} childrenByParent - Result of groupHeadersByParent
+ * @param {Map<(number|null), Object[]>} childrenByParent - Result of groupHeadersByParent
  * @returns {string[]} Headers of the sibling sections
  */
 function siblingsOf(section, childrenByParent) {
-    return childrenByParent.get(section.metadata.parent_id).filter(header => header !== section.header);
+    return childrenByParent.get(section.metadata.parent_id)
+        .filter(s => s.metadata.id !== section.metadata.id)
+        .map(s => s.header);
 }
 
 /**

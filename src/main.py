@@ -51,7 +51,9 @@ def split_text(text: str) -> list[Section]:
         - metadata.id: The section's index in the returned list
         - metadata.parent_id: The id of the parent section, or null for top level
         - metadata.parents: Ancestor headers keyed by level (e.g. {"h1": "Main"})
-        - metadata.span: [start, end] character offsets of the section in the input
+        - metadata.span: [start, end) character offsets of the section in the
+          input text (end is exclusive)
+        - metadata.char_count: Length of the span (end - start)
 
     Example:
         Input: "# Main\\nContent here\\n## Sub\\nSub content"

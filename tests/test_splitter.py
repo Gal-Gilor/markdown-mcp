@@ -153,3 +153,4 @@ async def test_split_text_span_indexes_input(mcp_server):
         sections = await _split(client, BASIC_MARKDOWN)
     start, end = sections[1]["metadata"]["span"]
     assert BASIC_MARKDOWN[start:end] == "## Getting Started\nFirst steps here."
+    assert sections[1]["metadata"]["char_count"] == end - start
