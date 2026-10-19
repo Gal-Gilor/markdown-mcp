@@ -7,8 +7,6 @@ from a Python application. It shows both basic usage and advanced patterns.
 
 import asyncio
 import json
-from typing import Dict
-from typing import List
 
 import httpx
 
@@ -21,7 +19,7 @@ class MarkdownMCPClient:
         self.base_url = base_url
         self.mcp_url = f"{base_url}/server/mcp/"
 
-    async def split_text(self, text: str) -> List[Dict]:
+    async def split_text(self, text: str) -> list[dict]:
         """Split markdown text using the MCP server."""
         payload = {
             "jsonrpc": "2.0",
@@ -62,6 +60,23 @@ class MarkdownMCPClient:
                 raise ValueError("Empty response from server")
 
 
+def group_headers_by_parent(sections: list[dict]) -> dict[int | None, list[dict]]:
+    """Map each parent_id to its child sections (None = top level)."""
+    children_by_parent: dict[int | None, list[dict]] = {}
+    for section in sections:
+        children_by_parent.setdefault(section["metadata"]["parent_id"], []).append(section)
+    return children_by_parent
+
+
+def siblings_of(section: dict, children_by_parent: dict[int | None, list[dict]]) -> list[str]:
+    """Headers of sections sharing this section's parent_id, excluding itself by id."""
+    return [
+        s["header"]
+        for s in children_by_parent[section["metadata"]["parent_id"]]
+        if s["metadata"]["id"] != section["metadata"]["id"]
+    ]
+
+
 async def example_basic_usage():
     """Demonstrate basic usage of the MCP client."""
     print("=== Basic Usage Example ===")
@@ -100,13 +115,15 @@ Build your own processors.
 
         print(f"Split document into {len(sections)} sections:\n")
 
+        children_by_parent = group_headers_by_parent(sections)
+
         for i, section in enumerate(sections, 1):
             print(f"Section {i}:")
-            print(f"  Header: {section['section_header']}")
-            print(f"  Level: {section['header_level']}")
+            print(f"  Header: {section['header']}")
+            print(f"  Level: {section['level']}")
             print(f"  Parents: {section['metadata']['parents']}")
-            print(f"  Siblings: {section['metadata']['siblings']}")
-            print(f"  Content: {section['section_text'][:50]}...")
+            print(f"  Siblings: {siblings_of(section, children_by_parent)}")
+            print(f"  Content: {section['content'][:50]}...")
             print()
 
     except Exception as e:
@@ -165,24 +182,24 @@ API rate limits apply.
         # Group by level
         levels = {}
         for section in sections:
-            level = section["header_level"]
+            level = section["level"]
             if level not in levels:
                 levels[level] = []
-            levels[level].append(section["section_header"])
+            levels[level].append(section["header"])
 
         for level in sorted(levels.keys()):
-            indent = "  " * (level - 1)
+            indent = "  " * max(level - 1, 0)
             print(f"Level {level} headers:")
             for header in levels[level]:
                 print(f"{indent}- {header}")
 
         print("\nSibling Relationships:")
         print("-" * 40)
+        children_by_parent = group_headers_by_parent(sections)
         for section in sections:
-            if section["metadata"]["siblings"]:
-                print(
-                    f"'{section['section_header']}' has siblings: {section['metadata']['siblings']}"
-                )
+            siblings = siblings_of(section, children_by_parent)
+            if siblings:
+                print(f"'{section['header']}' has siblings: {siblings}")
 
         print("\nParent-Child Relationships:")
         print("-" * 40)
@@ -191,7 +208,7 @@ API rate limits apply.
                 parents_str = " → ".join(
                     [f"{k.upper()}: {v}" for k, v in section["metadata"]["parents"].items()]
                 )
-                print(f"'{section['section_header']}' parents: {parents_str}")
+                print(f"'{section['header']}' parents: {parents_str}")
 
     except Exception as e:
         print(f"Error: {e}")

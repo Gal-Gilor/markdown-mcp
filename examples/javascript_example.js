@@ -61,7 +61,7 @@ class MarkdownMCPClient {
      * 
      * @example
      * const sections = await client.splitText('# Title\nContent\n## Subtitle\nMore content');
-     * console.log(sections[0].section_header); // 'Title'
+     * console.log(sections[0].header); // 'Title'
      * console.log(sections[1].metadata.parents); // {h1: 'Title'}
      */
     async splitText(text, options = {}) {
@@ -153,8 +153,8 @@ class MarkdownMCPClient {
                     
                     // Validate each section has required properties
                     for (const section of sectionsArray) {
-                        if (!section.section_header || section.section_text === undefined || !section.metadata) {
-                            throw new Error(`Invalid section structure in response: missing required fields in section '${section.section_header || 'unknown'}'`);
+                        if (typeof section.header !== 'string' || typeof section.content !== 'string' || !section.metadata) {
+                            throw new Error(`Invalid section structure in response: missing required fields in section '${section.header || 'unknown'}'`);
                         }
                     }
                     
@@ -195,6 +195,37 @@ class MarkdownMCPClient {
             clearTimeout(timeoutId);
         }
     }
+}
+
+/**
+ * Group sections by their parent section id.
+ *
+ * @param {Array<Object>} sections - Sections returned by splitText
+ * @returns {Map<(number|null), Object[]>} Map from metadata.parent_id (null = top level) to child sections
+ */
+function groupHeadersByParent(sections) {
+    const childrenByParent = new Map();
+    for (const section of sections) {
+        const parentId = section.metadata.parent_id;
+        if (!childrenByParent.has(parentId)) {
+            childrenByParent.set(parentId, []);
+        }
+        childrenByParent.get(parentId).push(section);
+    }
+    return childrenByParent;
+}
+
+/**
+ * Siblings are the sections that share a parent_id, minus the section itself.
+ *
+ * @param {Object} section - A section returned by splitText
+ * @param {Map<(number|null), Object[]>} childrenByParent - Result of groupHeadersByParent
+ * @returns {string[]} Headers of the sibling sections
+ */
+function siblingsOf(section, childrenByParent) {
+    return childrenByParent.get(section.metadata.parent_id)
+        .filter(s => s.metadata.id !== section.metadata.id)
+        .map(s => s.header);
 }
 
 /**
@@ -249,13 +280,15 @@ Configure advanced options.
         
         console.log(`Split document into ${sections.length} sections:\n`);
 
+        const childrenByParent = groupHeadersByParent(sections);
+
         sections.forEach((section, index) => {
             console.log(`Section ${index + 1}:`);
-            console.log(`  Header: ${section.section_header}`);
-            console.log(`  Level: ${section.header_level}`);
+            console.log(`  Header: ${section.header}`);
+            console.log(`  Level: ${section.level}`);
             console.log(`  Parents: ${JSON.stringify(section.metadata.parents)}`);
-            console.log(`  Siblings: ${JSON.stringify(section.metadata.siblings)}`);
-            console.log(`  Content: ${section.section_text.substring(0, 50)}...`);
+            console.log(`  Siblings: ${JSON.stringify(siblingsOf(section, childrenByParent))}`);
+            console.log(`  Content: ${section.content.substring(0, 50)}...`);
             console.log();
         });
 
@@ -340,17 +373,19 @@ Frequently asked questions.
         console.log('-'.repeat(40));
 
         sections.forEach(section => {
-            const indent = '  '.repeat(section.header_level - 1);
-            const bullet = section.header_level === 1 ? '•' : '◦';
-            console.log(`${indent}${bullet} ${section.section_header}`);
+            const indent = '  '.repeat(Math.max(section.level - 1, 0));
+            const bullet = section.level === 1 ? '•' : '◦';
+            console.log(`${indent}${bullet} ${section.header}`);
         });
 
         console.log('\nSection Navigation Map:');
         console.log('-'.repeat(40));
 
+        const childrenByParent = groupHeadersByParent(sections);
         sections.forEach(section => {
-            if (section.metadata.siblings.length > 0) {
-                console.log(`"${section.section_header}" → Related: ${section.metadata.siblings.join(', ')}`);
+            const siblings = siblingsOf(section, childrenByParent);
+            if (siblings.length > 0) {
+                console.log(`"${section.header}" → Related: ${siblings.join(', ')}`);
             }
         });
 
@@ -423,17 +458,18 @@ Environment configuration steps.
         };
 
         let totalContentLength = 0;
+        const childrenByParent = groupHeadersByParent(sections);
 
         sections.forEach(section => {
             // Count by level
-            const level = section.header_level;
+            const level = section.level;
             stats.levelCounts[level] = (stats.levelCounts[level] || 0) + 1;
             
             // Content length
-            totalContentLength += section.section_text.length;
+            totalContentLength += section.content.length;
             
             // Sections with siblings
-            if (section.metadata.siblings.length > 0) {
+            if (siblingsOf(section, childrenByParent).length > 0) {
                 stats.sectionsWithSiblings++;
             }
         });
@@ -458,9 +494,9 @@ Environment configuration steps.
         console.log('-'.repeat(40));
         
         sections.forEach(section => {
-            const indent = '│ '.repeat(section.header_level - 1);
-            const connector = section.header_level === 1 ? '├─' : '├─';
-            console.log(`${indent}${connector} ${section.section_header}`);
+            const indent = '│ '.repeat(Math.max(section.level - 1, 0));
+            const connector = section.level === 1 ? '├─' : '├─';
+            console.log(`${indent}${connector} ${section.header}`);
         });
 
     } catch (error) {

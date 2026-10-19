@@ -1,6 +1,6 @@
 [project]
 name = "markdown-mcp"
-version = "0.1"
+version = "0.2.0"
 description = "An MCP server for chunking Markdown documents."
 authors = [
     {name = "Gal Gilor", email = "gilorgal2010@gmail.com"}
@@ -14,7 +14,8 @@ dependencies = [
     "httpx (>=0.28.1,<0.29.0)", 
     "uvicorn (>=0.34.3,<0.35.0)", 
     "fastapi (>=0.115.12,<0.116.0)", 
-    "pyyaml (>=6.0.2,<7.0.0)"
+    "pyyaml (>=6.0.2,<7.0.0)", 
+    "markdown-chunkify (>=0.3.0,<0.4.0)"
 ]
 
 [project.urls]
@@ -35,11 +36,20 @@ pytest = "^8.4.0"
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
+[tool.ruff]
+line-length = 94
+fix = true
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
 [tool.ruff.lint.isort]
 force-single-line = true
 
 [tool.ruff.format]
 quote-style = "double"
+line-ending = "auto"
+docstring-code-format = true
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

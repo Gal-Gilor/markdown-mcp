@@ -8,12 +8,11 @@ import logging
 import logging.config
 import os
 from pathlib import Path
-from typing import Optional
 
 import yaml
 
 
-def setup_logging(config_path: Optional[str] = None) -> None:
+def setup_logging(config_path: str | None = None) -> None:
     """Configure logging for the entire application using YAML configuration.
 
     Args:
@@ -40,7 +39,7 @@ def setup_logging(config_path: Optional[str] = None) -> None:
     logs_dir.mkdir(exist_ok=True)
 
     try:
-        with open(config_path, "r") as f:
+        with open(config_path) as f:
             config = yaml.safe_load(f)
 
         # Allow environment variable override for log levels
@@ -61,7 +60,8 @@ def setup_logging(config_path: Optional[str] = None) -> None:
             level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         )
         logging.getLogger(__name__).error(
-            f"Failed to load logging configuration from {config_path}: {e}. Using basic configuration."
+            f"Failed to load logging configuration from {config_path}: {e}. "
+            "Using basic configuration."
         )
 
 
