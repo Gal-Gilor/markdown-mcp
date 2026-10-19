@@ -7,9 +7,6 @@ from a Python application. It shows both basic usage and advanced patterns.
 
 import asyncio
 import json
-from typing import Dict
-from typing import List
-from typing import Optional
 
 import httpx
 
@@ -22,7 +19,7 @@ class MarkdownMCPClient:
         self.base_url = base_url
         self.mcp_url = f"{base_url}/server/mcp/"
 
-    async def split_text(self, text: str) -> List[Dict]:
+    async def split_text(self, text: str) -> list[dict]:
         """Split markdown text using the MCP server."""
         payload = {
             "jsonrpc": "2.0",
@@ -63,19 +60,15 @@ class MarkdownMCPClient:
                 raise ValueError("Empty response from server")
 
 
-def group_headers_by_parent(sections: List[Dict]) -> Dict[Optional[int], List[Dict]]:
+def group_headers_by_parent(sections: list[dict]) -> dict[int | None, list[dict]]:
     """Map each parent_id to its child sections (None = top level)."""
-    children_by_parent: Dict[Optional[int], List[Dict]] = {}
+    children_by_parent: dict[int | None, list[dict]] = {}
     for section in sections:
-        children_by_parent.setdefault(section["metadata"]["parent_id"], []).append(
-            section
-        )
+        children_by_parent.setdefault(section["metadata"]["parent_id"], []).append(section)
     return children_by_parent
 
 
-def siblings_of(
-    section: Dict, children_by_parent: Dict[Optional[int], List[Dict]]
-) -> List[str]:
+def siblings_of(section: dict, children_by_parent: dict[int | None, list[dict]]) -> list[str]:
     """Headers of sections sharing this section's parent_id, excluding itself by id."""
     return [
         s["header"]
@@ -213,10 +206,7 @@ API rate limits apply.
         for section in sections:
             if section["metadata"]["parents"]:
                 parents_str = " → ".join(
-                    [
-                        f"{k.upper()}: {v}"
-                        for k, v in section["metadata"]["parents"].items()
-                    ]
+                    [f"{k.upper()}: {v}" for k, v in section["metadata"]["parents"].items()]
                 )
                 print(f"'{section['header']}' parents: {parents_str}")
 

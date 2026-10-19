@@ -1,33 +1,20 @@
-from functools import lru_cache
-
 import uvicorn
 from fastapi import FastAPI
 from fastmcp import FastMCP
-
 from markdown_chunkify import MarkdownSplitter
 from markdown_chunkify import Section
+
 from settings import get_logger
 
 logger = get_logger("MarkdownMCPServer")
 
 
-@lru_cache
-def _splitter() -> MarkdownSplitter:
-    """Returns a cached instance of MarkdownSplitter.
-
-    The library splitter is immutable, so one cached instance is safe to share
-    across concurrent requests.
-
-    Returns:
-        MarkdownSplitter: A cached instance of the MarkdownSplitter class.
-    """
-    return MarkdownSplitter()
-
-
 # Initialize FastMCP server with stateless HTTP support
 # This enables the server to handle HTTP requests without maintaining session state
 mcp = FastMCP("MarkdownMCPServer", stateless_http=True)
-markdown_splitter = _splitter()
+
+# The library splitter is immutable, so one instance is safe to share across requests
+markdown_splitter = MarkdownSplitter()
 
 
 @mcp.tool
